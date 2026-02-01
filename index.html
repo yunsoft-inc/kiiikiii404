@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>404 Not Found - KIIIKIII</title>
+<title>404 Not Found - KIIKIII</title>
 <link id="k-font" href="" rel="stylesheet">
 <style>
   :root {
@@ -16,80 +16,67 @@
   body, html {
     margin: 0; padding: 0; width: 100%; height: 100%;
     background: white; color: black;
-    font-family: sans-serif;
-    overflow-x: hidden;
+    font-family: 'Montserrat', 'Noto Sans KR', sans-serif;
+    overflow: hidden; /* 스크롤바 제거 */
     transition: background 1.5s ease;
   }
 
   body.dark { background: #000; color: #fff; }
 
-  /* 배경 글리치 레이어 */
   #fx-layer {
     position: fixed; inset: 0; z-index: 1; pointer-events: none;
     display: none;
   }
   body.dark #fx-layer { display: block; }
 
-  /* 가사 컨테이너 및 반응형 설정 */
   #wrapper {
     position: relative; z-index: 10;
-    width: 90%; max-width: 800px; margin: 0 auto;
-    padding: 50vh 0 50vh 0; text-align: center;
+    width: 100%; height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
   }
 
   h1#status-title { 
+    position: absolute; top: 10vh;
     font-size: 0.8rem; letter-spacing: 5px; opacity: 0.5; 
-    margin-bottom: 80px; text-transform: uppercase;
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
-    width: 100%;
+    margin: 0; text-transform: uppercase;
   }
 
-  /* 고퀄리티 글리치 애니메이션 */
-  .line-wrapper { 
-    margin: 50vh 0; 
-    width: 100%;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  /* 가사 출력 전용 컨테이너 */
+  #lyrics-display {
+    min-height: 150px;
+    display: flex; align-items: center; justify-content: center;
   }
 
   .line {
-    display: inline-block;
     position: relative;
     font-size: clamp(1.8rem, 8vw, 4.5rem);
     font-weight: 900; line-height: 1.1;
     padding: 10px 20px;
     background: rgba(0, 0, 0, 0.9);
-    opacity: 0; transform: translateY(20px);
-    transition: all 0.4s ease-out;
     word-break: keep-all;
-    font-family: 'Montserrat', 'Noto Sans KR', sans-serif;
+    /* 나타나는 애니메이션 */
+    animation: entry-glitch 0.4s steps(2) forwards;
   }
 
-  .line.active {
-    opacity: 1; transform: translateY(0);
+  /* 글리치 및 색상 애니메이션 */
+  @keyframes entry-glitch {
+    0% { opacity: 0; transform: scale(0.9) translateY(10px); filter: blur(10px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+  }
+
+  .active-glitch {
     animation: active-glitch 0.4s steps(2) infinite;
   }
 
-  /* RGB Split 효과 */
   @keyframes active-glitch {
     0% { text-shadow: 3px 0 var(--cyan), -3px 0 var(--pink); transform: translate(1px, 1px); }
     50% { text-shadow: -3px 0 var(--cyan), 3px 0 var(--pink); transform: translate(-1px, -1px); }
     100% { text-shadow: 2px 0 var(--blue), -2px 0 var(--purple); transform: translate(0); }
   }
 
-  /* 가사 색상 */
-  .line:nth-child(4n+1) { color: var(--cyan); }
-  .line:nth-child(4n+2) { color: var(--pink); }
-  .line:nth-child(4n+3) { color: var(--purple); }
-  .line:nth-child(4n+4) { color: #fff; }
-
-  /* 배경 섬광 효과 */
+  /* 배경 섬광 */
   .flash {
     position: absolute; inset: 0;
     mix-blend-mode: color-dodge;
@@ -97,21 +84,15 @@
   }
 
   @keyframes flash-anim {
-    0% { background: var(--purple); opacity: 0.8; transform: scaleY(0.1); }
-    50% { background: var(--blue); opacity: 0.4; transform: scaleY(1); }
+    0% { background: var(--purple); opacity: 0.8; }
     100% { background: transparent; opacity: 0; }
   }
 
   #ending { 
-    display: none; 
-    padding: 50vh 0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: none; position: absolute; bottom: 10vh;
+    text-align: center;
   }
-  #ending h3 { font-size: clamp(3rem, 15vw, 6rem); margin: 10px 0; color: #fff; }
+  #ending h3 { font-size: clamp(2rem, 10vw, 4rem); margin: 5px 0; color: #fff; }
 
   #guide { 
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; 
@@ -127,10 +108,12 @@
 
 <div id="wrapper">
   <h1 id="status-title">404 Not Found</h1>
-  <div id="lyrics-container"></div>
-  <div id="ending" style="display: none;">
+  
+  <div id="lyrics-display"></div>
+
+  <div id="ending">
     <h2 style="color: var(--pink); letter-spacing: 10px; font-size: 0.9rem;">ARTIST</h2>
-    <h3>KIIIKIII</h3>
+    <h3>KIIKIII</h3>
     <p style="letter-spacing: 4px; opacity: 0.5; font-size: 0.8rem;">404 NEW ERA RECONNECTED</p>
   </div>
 </div>
@@ -147,103 +130,64 @@ const lyricsData = [
  "404, THE NEW ERA, ERA"
 ];
 
+const colors = ['var(--cyan)', 'var(--pink)', 'var(--purple)', '#fff'];
+
 let isStarted = false;
-let currentScrollTarget = 0;
 const audio = new Audio("404.mp3");
 
 function startPerformance() {
   if (isStarted) return;
   isStarted = true;
   
-  // 가이드 페이드아웃
   const guide = document.getElementById('guide');
-  guide.style.transition = 'opacity 0.8s';
   guide.style.opacity = '0';
   setTimeout(() => guide.style.display = 'none', 800);
   
   audio.play();
 
-  // 2초 대기 시퀀스
   setTimeout(() => {
     document.getElementById('k-font').href = "https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Noto+Sans+KR:wght@900&display=swap";
     document.body.classList.add('dark');
     document.getElementById('status-title').textContent = "[ STATUS: RECONNECTING ]";
-    
-    // 먼저 모든 가사 DOM을 생성
-    preloadLyrics();
-    
-    // 그 다음 애니메이션 시작
-    setTimeout(() => runLyrics(), 100);
+    runLyrics();
   }, 2000);
-}
-
-// 먼저 모든 가사 DOM을 생성해서 높이 계산 가능하게 만들기
-function preloadLyrics() {
-  const container = document.getElementById('lyrics-container');
-  
-  lyricsData.forEach((text, index) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'line-wrapper';
-    wrap.id = `lyric-${index}`;
-    
-    const div = document.createElement('div');
-    div.className = 'line';
-    div.textContent = text;
-    
-    wrap.appendChild(div);
-    container.appendChild(wrap);
-  });
 }
 
 function runLyrics() {
   let index = 0;
-  
+  const display = document.getElementById('lyrics-display');
+  const fxLayer = document.getElementById('fx-layer');
+
   const timer = setInterval(() => {
     if (index >= lyricsData.length) {
       clearInterval(timer);
-      setTimeout(showFinalEnding, 500);
+      setTimeout(showFinalEnding, 1000);
       return;
     }
 
-    // 이전 가사 효과 제거
-    const lines = document.querySelectorAll('.line');
-    lines.forEach(l => l.classList.remove('active'));
+    // 새로운 가사 엘리먼트 생성 (매번 교체)
+    display.innerHTML = ''; 
+    const line = document.createElement('div');
+    line.className = 'line active-glitch';
+    line.style.color = colors[index % colors.length];
+    line.textContent = lyricsData[index];
+    display.appendChild(line);
 
-    // 현재 가사 활성화
-    const currentWrap = document.getElementById(`lyric-${index}`);
-    const currentLine = currentWrap.querySelector('.line');
-    currentLine.classList.add('active');
-
-    // 배경 글리치 플래시
-    const fxLayer = document.getElementById('fx-layer');
+    // 배경 섬광 효과
     const flash = document.createElement('div');
     flash.className = 'flash';
     fxLayer.appendChild(flash);
     setTimeout(() => flash.remove(), 400);
-
-    // 스크롤 (즉시 실행)
-    const targetPosition = currentWrap.offsetTop - (window.innerHeight / 2) + (currentWrap.offsetHeight / 2);
-    window.scrollTo({
-      top: targetPosition,
-      behavior: 'smooth'
-    });
 
     index++;
   }, 1850);
 }
 
 function showFinalEnding() {
+  document.getElementById('lyrics-display').style.display = 'none';
   const ending = document.getElementById('ending');
-  ending.style.display = 'flex';
-  
-  setTimeout(() => {
-    const targetPosition = ending.offsetTop - (window.innerHeight / 2) + (ending.offsetHeight / 2);
-    window.scrollTo({
-      top: targetPosition,
-      behavior: 'smooth'
-    });
-    document.getElementById('status-title').textContent = "[ RECONNECTION COMPLETE ]";
-  }, 100);
+  ending.style.display = 'block';
+  document.getElementById('status-title').textContent = "[ RECONNECTION COMPLETE ]";
 }
 </script>
 </body>
