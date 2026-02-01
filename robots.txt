@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://yunsoft-inc.github.io/kiiikiii404/sitemap.xml
