@@ -19,6 +19,9 @@
     font-family: sans-serif;
     overflow-x: hidden;
     transition: background 1.5s ease;
+    /* 모바일 스크롤 개선 */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
 
   body.dark { background: #000; color: #fff; }
@@ -43,7 +46,13 @@
   }
 
   /* 고퀄리티 글리치 애니메이션 */
-  .line-wrapper { margin: 100px 0; width: 100%; }
+  .line-wrapper { 
+    margin: 100px 0; 
+    width: 100%;
+    /* 스크롤 타겟 개선 */
+    scroll-margin-top: 40vh;
+    scroll-margin-bottom: 40vh;
+  }
 
   .line {
     display: inline-block;
@@ -132,6 +141,9 @@ const lyricsData = [
 let isStarted = false;
 const audio = new Audio("404.mp3");
 
+// 모바일 감지
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
 function startPerformance() {
   if (isStarted) return;
   isStarted = true;
@@ -151,6 +163,29 @@ function startPerformance() {
     document.getElementById('status-title').textContent = "[ STATUS: RECONNECTING ]";
     runLyrics();
   }, 2000);
+}
+
+function smoothScrollTo(element) {
+  if (!element) return;
+  
+  // 모바일에서 더 확실한 스크롤 처리
+  if (isMobile) {
+    // requestAnimationFrame으로 스크롤 타이밍 보장
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const elementTop = element.getBoundingClientRect().top;
+        const offsetPosition = elementTop + window.pageYOffset - (window.innerHeight / 2) + (element.offsetHeight / 2);
+        
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      });
+    });
+  } else {
+    // PC에서는 기존 방식
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 }
 
 function runLyrics() {
@@ -184,8 +219,11 @@ function runLyrics() {
     fxLayer.appendChild(flash);
     setTimeout(() => flash.remove(), 400);
 
-    // 스크롤 (중앙 정렬)
-    div.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // 개선된 스크롤 (약간의 딜레이 추가로 DOM 렌더링 완료 보장)
+    setTimeout(() => {
+      smoothScrollTo(div);
+    }, 50);
+
     index++;
   }, 1850);
 }
@@ -193,8 +231,11 @@ function runLyrics() {
 function showFinalEnding() {
   const ending = document.getElementById('ending');
   ending.style.display = 'block';
-  ending.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  document.getElementById('status-title').textContent = "[ RECONNECTION COMPLETE ]";
+  
+  setTimeout(() => {
+    smoothScrollTo(ending);
+    document.getElementById('status-title').textContent = "[ RECONNECTION COMPLETE ]";
+  }, 100);
 }
 </script>
 </body>
