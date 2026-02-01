@@ -19,9 +19,6 @@
     font-family: sans-serif;
     overflow-x: hidden;
     transition: background 1.5s ease;
-    /* 모바일 스크롤 개선 */
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
   }
 
   body.dark { background: #000; color: #fff; }
@@ -37,27 +34,34 @@
   #wrapper {
     position: relative; z-index: 10;
     width: 90%; max-width: 800px; margin: 0 auto;
-    padding: 15vh 0 30vh 0; text-align: center;
+    padding: 50vh 0 50vh 0; text-align: center;
   }
 
   h1#status-title { 
     font-size: 0.8rem; letter-spacing: 5px; opacity: 0.5; 
     margin-bottom: 80px; text-transform: uppercase;
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    width: 100%;
   }
 
   /* 고퀄리티 글리치 애니메이션 */
   .line-wrapper { 
-    margin: 100px 0; 
+    margin: 50vh 0; 
     width: 100%;
-    /* 스크롤 타겟 개선 */
-    scroll-margin-top: 40vh;
-    scroll-margin-bottom: 40vh;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .line {
     display: inline-block;
     position: relative;
-    font-size: clamp(1.8rem, 8vw, 4.5rem); /* 모바일 대응 폰트 */
+    font-size: clamp(1.8rem, 8vw, 4.5rem);
     font-weight: 900; line-height: 1.1;
     padding: 10px 20px;
     background: rgba(0, 0, 0, 0.9);
@@ -99,8 +103,13 @@
   }
 
   #ending { 
-    display: none; padding-top: 50px; 
-    border-top: 1px solid rgba(255,255,255,0.1);
+    display: none; 
+    padding: 50vh 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
   #ending h3 { font-size: clamp(3rem, 15vw, 6rem); margin: 10px 0; color: #fff; }
 
@@ -119,7 +128,7 @@
 <div id="wrapper">
   <h1 id="status-title">404 Not Found</h1>
   <div id="lyrics-container"></div>
-  <div id="ending">
+  <div id="ending" style="display: none;">
     <h2 style="color: var(--pink); letter-spacing: 10px; font-size: 0.9rem;">ARTIST</h2>
     <h3>KIIIKIII</h3>
     <p style="letter-spacing: 4px; opacity: 0.5; font-size: 0.8rem;">404 NEW ERA RECONNECTED</p>
@@ -139,10 +148,8 @@ const lyricsData = [
 ];
 
 let isStarted = false;
+let currentScrollTarget = 0;
 const audio = new Audio("404.mp3");
-
-// 모바일 감지
-const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 function startPerformance() {
   if (isStarted) return;
@@ -161,38 +168,36 @@ function startPerformance() {
     document.getElementById('k-font').href = "https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Noto+Sans+KR:wght@900&display=swap";
     document.body.classList.add('dark');
     document.getElementById('status-title').textContent = "[ STATUS: RECONNECTING ]";
-    runLyrics();
+    
+    // 먼저 모든 가사 DOM을 생성
+    preloadLyrics();
+    
+    // 그 다음 애니메이션 시작
+    setTimeout(() => runLyrics(), 100);
   }, 2000);
 }
 
-function smoothScrollTo(element) {
-  if (!element) return;
+// 먼저 모든 가사 DOM을 생성해서 높이 계산 가능하게 만들기
+function preloadLyrics() {
+  const container = document.getElementById('lyrics-container');
   
-  // 모바일에서 더 확실한 스크롤 처리
-  if (isMobile) {
-    // requestAnimationFrame으로 스크롤 타이밍 보장
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const elementTop = element.getBoundingClientRect().top;
-        const offsetPosition = elementTop + window.pageYOffset - (window.innerHeight / 2) + (element.offsetHeight / 2);
-        
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-      });
-    });
-  } else {
-    // PC에서는 기존 방식
-    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
+  lyricsData.forEach((text, index) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'line-wrapper';
+    wrap.id = `lyric-${index}`;
+    
+    const div = document.createElement('div');
+    div.className = 'line';
+    div.textContent = text;
+    
+    wrap.appendChild(div);
+    container.appendChild(wrap);
+  });
 }
 
 function runLyrics() {
   let index = 0;
-  const container = document.getElementById('lyrics-container');
-  const fxLayer = document.getElementById('fx-layer');
-
+  
   const timer = setInterval(() => {
     if (index >= lyricsData.length) {
       clearInterval(timer);
@@ -204,25 +209,24 @@ function runLyrics() {
     const lines = document.querySelectorAll('.line');
     lines.forEach(l => l.classList.remove('active'));
 
-    // 가사 생성
-    const wrap = document.createElement('div');
-    wrap.className = 'line-wrapper';
-    const div = document.createElement('div');
-    div.className = 'line active';
-    div.textContent = lyricsData[index];
-    wrap.appendChild(div);
-    container.appendChild(wrap);
+    // 현재 가사 활성화
+    const currentWrap = document.getElementById(`lyric-${index}`);
+    const currentLine = currentWrap.querySelector('.line');
+    currentLine.classList.add('active');
 
     // 배경 글리치 플래시
+    const fxLayer = document.getElementById('fx-layer');
     const flash = document.createElement('div');
     flash.className = 'flash';
     fxLayer.appendChild(flash);
     setTimeout(() => flash.remove(), 400);
 
-    // 개선된 스크롤 (약간의 딜레이 추가로 DOM 렌더링 완료 보장)
-    setTimeout(() => {
-      smoothScrollTo(div);
-    }, 50);
+    // 스크롤 (즉시 실행)
+    const targetPosition = currentWrap.offsetTop - (window.innerHeight / 2) + (currentWrap.offsetHeight / 2);
+    window.scrollTo({
+      top: targetPosition,
+      behavior: 'smooth'
+    });
 
     index++;
   }, 1850);
@@ -230,10 +234,14 @@ function runLyrics() {
 
 function showFinalEnding() {
   const ending = document.getElementById('ending');
-  ending.style.display = 'block';
+  ending.style.display = 'flex';
   
   setTimeout(() => {
-    smoothScrollTo(ending);
+    const targetPosition = ending.offsetTop - (window.innerHeight / 2) + (ending.offsetHeight / 2);
+    window.scrollTo({
+      top: targetPosition,
+      behavior: 'smooth'
+    });
     document.getElementById('status-title').textContent = "[ RECONNECTION COMPLETE ]";
   }, 100);
 }
